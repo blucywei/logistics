@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="1f3b6a3bf3854172a4e98433cc5e61fa" Name="Diagram1">
+        <EntityTypeShape EntityType="LogisticsModel.ei_users" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogisticsModel.vw_lg_users" Width="1.5" PointX="2.75" PointY="0.75" />
+        <EntityTypeShape EntityType="LogisticsModel.lg_event_log" Width="1.5" PointX="5.375" PointY="0.75" />
+        <EntityTypeShape EntityType="LogisticsModel.lg_carLocation" Width="1.5" PointX="5.375" PointY="3.375" />
+        <EntityTypeShape EntityType="LogisticsModel.vw_lg_cardBord" Width="1.5" PointX="7.375" PointY="0.75" />
+        <EntityTypeShape EntityType="LogisticsModel.vw_lg_localInfo" Width="1.5" PointX="9.375" PointY="0.875" />
+        <EntityTypeShape EntityType="LogisticsModel.vw_lg_truckPermition" Width="1.5" PointX="2.5" PointY="5.5" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

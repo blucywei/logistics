@@ -1,0 +1,686 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="LogisticsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+        <EntityType Name="ei_users">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="card_number" Type="varchar" MaxLength="50" />
+          <Property Name="name" Type="varchar" MaxLength="100" />
+          <Property Name="email" Type="varchar" MaxLength="50" />
+          <Property Name="phone" Type="varchar" MaxLength="50" />
+          <Property Name="forbit_flag" Type="bit" />
+          <Property Name="create_date" Type="smalldatetime" />
+          <Property Name="last_login_date" Type="smalldatetime" />
+          <Property Name="password" Type="varchar" MaxLength="50" />
+          <Property Name="fail_times" Type="int" />
+          <Property Name="sex" Type="varchar" MaxLength="10" />
+          <Property Name="id_number" Type="varchar" MaxLength="50" />
+          <Property Name="salary_no" Type="varchar" MaxLength="20" />
+          <Property Name="short_phone" Type="varchar" MaxLength="50" />
+          <Property Name="short_portrait" Type="image" />
+        </EntityType>
+        <EntityType Name="lg_carLocation">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="car_no" Type="varchar" MaxLength="50" />
+          <Property Name="loc" Type="varchar" MaxLength="100" />
+          <Property Name="priority" Type="int" />
+          <Property Name="dtime" Type="datetime" />
+        </EntityType>
+        <EntityType Name="lg_event_log">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_id" Type="int" />
+          <Property Name="user_name" Type="varchar" MaxLength="50" />
+          <Property Name="model" Type="varchar" MaxLength="50" />
+          <Property Name="do_what" Type="varchar" MaxLength="500" />
+          <Property Name="is_normal" Type="int" />
+          <Property Name="op_date" Type="smalldatetime" />
+          <Property Name="ip" Type="varchar" MaxLength="64" />
+        </EntityType>
+        <!--生成过程中发现错误:
+警告 6002: 表/视图“ICAudit.dbo.vw_lg_cardBord”未定义主键。已推断出该键，并将定义创建为只读的表/视图。-->
+        <EntityType Name="vw_lg_cardBord">
+          <Key>
+            <PropertyRef Name="id" />
+            <PropertyRef Name="destination_priority" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="card_no" Type="varchar" MaxLength="255" />
+          <Property Name="car_priority" Type="int" />
+          <Property Name="department" Type="varchar" MaxLength="255" />
+          <Property Name="department_pos" Type="varchar" MaxLength="1000" />
+          <Property Name="status" Type="varchar" MaxLength="50" />
+          <Property Name="loader_name" Type="varchar" MaxLength="255" />
+          <Property Name="loader_number" Type="varchar" MaxLength="255" />
+          <Property Name="loader_date" Type="datetime" />
+          <Property Name="loader_canceller" Type="varchar" MaxLength="255" />
+          <Property Name="caceller_date" Type="datetime" />
+          <Property Name="transfer_name" Type="varchar" MaxLength="200" />
+          <Property Name="transfer_num" Type="varchar" MaxLength="200" />
+          <Property Name="transfer_date" Type="datetime" />
+          <Property Name="receiver_name" Type="varchar" MaxLength="255" />
+          <Property Name="receiver_num" Type="varchar" MaxLength="255" />
+          <Property Name="receiver_date" Type="datetime" />
+          <Property Name="destination" Type="varchar" MaxLength="500" />
+          <Property Name="destination_priority" Type="varchar" MaxLength="500" Nullable="false" />
+          <Property Name="department_priority" Type="int" />
+          <Property Name="department_contacts" Type="varchar" MaxLength="255" />
+          <Property Name="department_contact_email" Type="varchar" MaxLength="255" />
+          <Property Name="destination_contacts" Type="varchar" MaxLength="255" />
+          <Property Name="destination_contact_email" Type="varchar" MaxLength="255" />
+          <Property Name="return_apply_date" Type="varchar" MaxLength="50" />
+          <Property Name="return_apply_name" Type="varchar" MaxLength="255" />
+          <Property Name="return_status" Type="varchar" MaxLength="50" />
+          <Property Name="return_reason" Type="varchar" MaxLength="5000" />
+          <Property Name="pack_num" Type="int" />
+          <Property Name="is_emergency" Type="int" />
+          <Property Name="mobile_phone" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <!--生成过程中发现错误:
+警告 6002: 表/视图“ICAudit.dbo.vw_lg_localInfo”未定义主键。已推断出该键，并将定义创建为只读的表/视图。-->
+        <EntityType Name="vw_lg_localInfo">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="255" />
+          <Property Name="position" Type="varchar" MaxLength="1000" />
+          <Property Name="number" Type="varchar" MaxLength="255" />
+          <Property Name="contacts" Type="varchar" MaxLength="255" />
+          <Property Name="contact_email" Type="varchar" MaxLength="255" />
+          <Property Name="priority" Type="int" />
+          <Property Name="mobile_phone" Type="varchar" MaxLength="200" />
+        </EntityType>
+        <!--生成过程中发现错误:
+警告 6002: 表/视图“ICAudit.dbo.vw_lg_truckPermition”未定义主键。已推断出该键，并将定义创建为只读的表/视图。-->
+        <EntityType Name="vw_lg_truckPermition">
+          <Key>
+            <PropertyRef Name="account" />
+            <PropertyRef Name="id" />
+            <PropertyRef Name="FInterID" />
+            <PropertyRef Name="FBillNo" />
+          </Key>
+          <Property Name="account" Type="varchar" MaxLength="4" Nullable="false" />
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="FInterID" Type="int" Nullable="false" />
+          <Property Name="FBillNo" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="FSubmiter" Type="varchar" MaxLength="50" />
+          <Property Name="FSubDate" Type="datetime" />
+          <Property Name="FSBillNo" Type="varchar" MaxLength="50" />
+          <Property Name="FSInterID" Type="varchar" MaxLength="50" />
+          <Property Name="FStatus" Type="int" />
+          <Property Name="FEmpName" Type="varchar" MaxLength="50" />
+          <Property Name="FShipToName" Type="varchar" MaxLength="100" />
+          <Property Name="FChecker" Type="varchar" MaxLength="255" />
+          <Property Name="FCheckDate" Type="datetime" />
+          <Property Name="FItemName" Type="varchar" MaxLength="50" />
+          <Property Name="FModel" Type="varchar" MaxLength="250" />
+          <Property Name="FQty" Type="numeric" Precision="18" Scale="4" />
+        </EntityType>
+        <!--生成过程中发现错误:
+警告 6002: 表/视图“ICAudit.dbo.vw_lg_users”未定义主键。已推断出该键，并将定义创建为只读的表/视图。-->
+        <EntityType Name="vw_lg_users">
+          <Key>
+            <PropertyRef Name="platform" />
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="platform" Type="varchar" MaxLength="7" Nullable="false" />
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="card_number" Type="varchar" MaxLength="80" />
+          <Property Name="name" Type="varchar" MaxLength="100" />
+          <Property Name="car_no" Type="varchar" MaxLength="255" />
+          <Property Name="phone_no" Type="varchar" MaxLength="200" />
+          <Property Name="short_phone_no" Type="varchar" MaxLength="200" />
+          <Property Name="email" Type="varchar" MaxLength="255" />
+          <Property Name="duty" Type="varchar" MaxLength="255" />
+          <Property Name="password" Type="varchar" MaxLength="250" />
+          <Property Name="forbit_flag" Type="int" />
+          <Property Name="fail_times" Type="int" />
+          <Property Name="last_login_date" Type="datetime" />
+          <Property Name="default_loc" Type="varchar" MaxLength="500" />
+          <Property Name="default_loc_priority" Type="int" />
+          <Property Name="limit_qty" Type="int" />
+          <Property Name="route" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <Function Name="AuditLgReturnCard" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cardNo" Type="varchar" Mode="In" />
+          <Parameter Name="user_no" Type="varchar" Mode="In" />
+          <Parameter Name="user_name" Type="varchar" Mode="In" />
+          <Parameter Name="status" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="AuditLGTruckPermition" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="account" Type="varchar" Mode="In" />
+          <Parameter Name="id" Type="int" Mode="In" />
+          <Parameter Name="checker" Type="varchar" Mode="In" />
+          <Parameter Name="status" Type="int" Mode="In" />
+          <Parameter Name="opinion" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="GetHREmpStatus" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="card_no" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="GetLGFinishPermition" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="fromDate" Type="datetime" Mode="In" />
+          <Parameter Name="toDate" Type="datetime" Mode="In" />
+          <Parameter Name="searchText" Type="varchar" Mode="In" />
+          <Parameter Name="auditorName" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="UpdateLgCardInfo" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="id" Type="int" Mode="In" />
+          <Parameter Name="user_no" Type="varchar" Mode="In" />
+          <Parameter Name="user_name" Type="varchar" Mode="In" />
+          <Parameter Name="op_type" Type="varchar" Mode="In" />
+          <Parameter Name="car_no" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="UpdateLgDefaultLoc" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="card_no" Type="varchar" Mode="In" />
+          <Parameter Name="loc" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="UpdateLgPDAUser" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="card_no" Type="varchar" Mode="In" />
+          <Parameter Name="fail_times" Type="int" Mode="In" />
+          <Parameter Name="last_login_date" Type="datetime" Mode="In" />
+          <Parameter Name="active_flag" Type="bit" Mode="In" />
+        </Function>
+        <Function Name="UpdatePDAPassword" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="card_no" Type="varchar" Mode="In" />
+          <Parameter Name="new_pass" Type="varchar" Mode="In" />
+        </Function>
+        <EntityContainer Name="LogisticsModelStoreContainer">
+          <EntitySet Name="ei_users" EntityType="Self.ei_users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="lg_carLocation" EntityType="Self.lg_carLocation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="lg_event_log" EntityType="Self.lg_event_log" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="vw_lg_cardBord" EntityType="Self.vw_lg_cardBord" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+[vw_lg_cardBord].[id] AS [id], 
+[vw_lg_cardBord].[card_no] AS [card_no], 
+[vw_lg_cardBord].[car_priority] AS [car_priority], 
+[vw_lg_cardBord].[department] AS [department], 
+[vw_lg_cardBord].[department_pos] AS [department_pos], 
+[vw_lg_cardBord].[status] AS [status], 
+[vw_lg_cardBord].[loader_name] AS [loader_name], 
+[vw_lg_cardBord].[loader_number] AS [loader_number], 
+[vw_lg_cardBord].[loader_date] AS [loader_date], 
+[vw_lg_cardBord].[loader_canceller] AS [loader_canceller], 
+[vw_lg_cardBord].[caceller_date] AS [caceller_date], 
+[vw_lg_cardBord].[transfer_name] AS [transfer_name], 
+[vw_lg_cardBord].[transfer_num] AS [transfer_num], 
+[vw_lg_cardBord].[transfer_date] AS [transfer_date], 
+[vw_lg_cardBord].[receiver_name] AS [receiver_name], 
+[vw_lg_cardBord].[receiver_num] AS [receiver_num], 
+[vw_lg_cardBord].[receiver_date] AS [receiver_date], 
+[vw_lg_cardBord].[destination] AS [destination], 
+[vw_lg_cardBord].[destination_priority] AS [destination_priority], 
+[vw_lg_cardBord].[department_priority] AS [department_priority], 
+[vw_lg_cardBord].[department_contacts] AS [department_contacts], 
+[vw_lg_cardBord].[department_contact_email] AS [department_contact_email], 
+[vw_lg_cardBord].[destination_contacts] AS [destination_contacts], 
+[vw_lg_cardBord].[destination_contact_email] AS [destination_contact_email], 
+[vw_lg_cardBord].[return_apply_date] AS [return_apply_date], 
+[vw_lg_cardBord].[return_apply_name] AS [return_apply_name], 
+[vw_lg_cardBord].[return_status] AS [return_status], 
+[vw_lg_cardBord].[return_reason] AS [return_reason], 
+[vw_lg_cardBord].[pack_num] AS [pack_num], 
+[vw_lg_cardBord].[is_emergency] AS [is_emergency], 
+[vw_lg_cardBord].[mobile_phone] AS [mobile_phone]
+FROM [dbo].[vw_lg_cardBord] AS [vw_lg_cardBord]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vw_lg_localInfo" EntityType="Self.vw_lg_localInfo" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+[vw_lg_localInfo].[id] AS [id], 
+[vw_lg_localInfo].[name] AS [name], 
+[vw_lg_localInfo].[position] AS [position], 
+[vw_lg_localInfo].[number] AS [number], 
+[vw_lg_localInfo].[contacts] AS [contacts], 
+[vw_lg_localInfo].[contact_email] AS [contact_email], 
+[vw_lg_localInfo].[priority] AS [priority], 
+[vw_lg_localInfo].[mobile_phone] AS [mobile_phone]
+FROM [dbo].[vw_lg_localInfo] AS [vw_lg_localInfo]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vw_lg_truckPermition" EntityType="Self.vw_lg_truckPermition" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+[vw_lg_truckPermition].[account] AS [account], 
+[vw_lg_truckPermition].[id] AS [id], 
+[vw_lg_truckPermition].[FInterID] AS [FInterID], 
+[vw_lg_truckPermition].[FBillNo] AS [FBillNo], 
+[vw_lg_truckPermition].[FSubmiter] AS [FSubmiter], 
+[vw_lg_truckPermition].[FSubDate] AS [FSubDate], 
+[vw_lg_truckPermition].[FSBillNo] AS [FSBillNo], 
+[vw_lg_truckPermition].[FSInterID] AS [FSInterID], 
+[vw_lg_truckPermition].[FStatus] AS [FStatus], 
+[vw_lg_truckPermition].[FEmpName] AS [FEmpName], 
+[vw_lg_truckPermition].[FShipToName] AS [FShipToName], 
+[vw_lg_truckPermition].[FChecker] AS [FChecker], 
+[vw_lg_truckPermition].[FCheckDate] AS [FCheckDate], 
+[vw_lg_truckPermition].[FItemName] AS [FItemName], 
+[vw_lg_truckPermition].[FModel] AS [FModel], 
+[vw_lg_truckPermition].[FQty] AS [FQty]
+FROM [dbo].[vw_lg_truckPermition] AS [vw_lg_truckPermition]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vw_lg_users" EntityType="Self.vw_lg_users" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+[vw_lg_users].[platform] AS [platform], 
+[vw_lg_users].[id] AS [id], 
+[vw_lg_users].[card_number] AS [card_number], 
+[vw_lg_users].[name] AS [name], 
+[vw_lg_users].[car_no] AS [car_no], 
+[vw_lg_users].[phone_no] AS [phone_no], 
+[vw_lg_users].[short_phone_no] AS [short_phone_no], 
+[vw_lg_users].[email] AS [email], 
+[vw_lg_users].[duty] AS [duty], 
+[vw_lg_users].[password] AS [password], 
+[vw_lg_users].[forbit_flag] AS [forbit_flag], 
+[vw_lg_users].[fail_times] AS [fail_times], 
+[vw_lg_users].[last_login_date] AS [last_login_date], 
+[vw_lg_users].[default_loc] AS [default_loc], 
+[vw_lg_users].[default_loc_priority] AS [default_loc_priority], 
+[vw_lg_users].[limit_qty] AS [limit_qty], 
+[vw_lg_users].[route] AS [route]
+FROM [dbo].[vw_lg_users] AS [vw_lg_users]</DefiningQuery>
+          </EntitySet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="LogisticsModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+        <EntityType Name="ei_users">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="card_number" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="phone" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="forbit_flag" Type="Boolean" />
+          <Property Name="create_date" Type="DateTime" Precision="0" />
+          <Property Name="last_login_date" Type="DateTime" Precision="0" />
+          <Property Name="password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="fail_times" Type="Int32" />
+          <Property Name="sex" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="id_number" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="salary_no" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="short_phone" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="short_portrait" Type="Binary" MaxLength="Max" FixedLength="false" />
+        </EntityType>
+        <EntityContainer Name="LogisticsEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="ei_users" EntityType="Self.ei_users" />
+          <FunctionImport Name="GetHREmpStatus" ReturnType="Collection(String)">
+          <Parameter Name="card_no" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="UpdateLgPDAUser">
+            <Parameter Name="card_no" Mode="In" Type="String" />
+            <Parameter Name="fail_times" Mode="In" Type="Int32" />
+            <Parameter Name="last_login_date" Mode="In" Type="DateTime" />
+            <Parameter Name="active_flag" Mode="In" Type="Boolean" />
+          </FunctionImport>
+          <EntitySet Name="vw_lg_users" EntityType="LogisticsModel.vw_lg_users" />
+          <EntitySet Name="lg_event_log" EntityType="LogisticsModel.lg_event_log" />
+          <FunctionImport Name="UpdatePDAPassword">
+            <Parameter Name="card_no" Mode="In" Type="String" />
+            <Parameter Name="new_pass" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="UpdateLgCardInfo">
+            <Parameter Name="id" Mode="In" Type="Int32" />
+            <Parameter Name="user_no" Mode="In" Type="String" />
+            <Parameter Name="user_name" Mode="In" Type="String" />
+            <Parameter Name="op_type" Mode="In" Type="String" />
+            <Parameter Name="car_no" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="UpdateLgDefaultLoc">
+            <Parameter Name="card_no" Mode="In" Type="String" />
+            <Parameter Name="loc" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="lg_carLocation" EntityType="LogisticsModel.lg_carLocation" />
+          <FunctionImport Name="AuditLgReturnCard">
+            <Parameter Name="cardNo" Mode="In" Type="String" />
+            <Parameter Name="user_no" Mode="In" Type="String" />
+            <Parameter Name="user_name" Mode="In" Type="String" />
+            <Parameter Name="status" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="vw_lg_cardBord" EntityType="LogisticsModel.vw_lg_cardBord" />
+          <EntitySet Name="vw_lg_localInfo" EntityType="LogisticsModel.vw_lg_localInfo" />
+          <EntitySet Name="vw_lg_truckPermition" EntityType="LogisticsModel.vw_lg_truckPermition" />
+          <FunctionImport Name="GetLGFinishPermition" ReturnType="Collection(LogisticsModel.GetLGFinishPermition_Result)">
+            <Parameter Name="fromDate" Mode="In" Type="DateTime" />
+            <Parameter Name="toDate" Mode="In" Type="DateTime" />
+            <Parameter Name="searchText" Mode="In" Type="String" />
+            <Parameter Name="auditorName" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="AuditLGTruckPermition">
+            <Parameter Name="account" Mode="In" Type="String" />
+            <Parameter Name="id" Mode="In" Type="Int32" />
+            <Parameter Name="checker" Mode="In" Type="String" />
+            <Parameter Name="status" Mode="In" Type="Int32" />
+            <Parameter Name="opinion" Mode="In" Type="String" />
+          </FunctionImport>
+        </EntityContainer>
+        <EntityType Name="vw_lg_users">
+          <Key>
+            <PropertyRef Name="platform" />
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="platform" Type="String" Nullable="false" MaxLength="7" FixedLength="false" Unicode="false" />
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="card_number" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="car_no" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="phone_no" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="short_phone_no" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="duty" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="password" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="forbit_flag" Type="Int32" />
+          <Property Name="fail_times" Type="Int32" />
+          <Property Name="last_login_date" Type="DateTime" Precision="3" />
+          <Property Name="default_loc" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="default_loc_priority" Type="Int32" />
+          <Property Name="limit_qty" Type="Int32" />
+          <Property Name="route" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="lg_event_log">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_id" Type="Int32" />
+          <Property Name="user_name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="model" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="do_what" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="is_normal" Type="Int32" />
+          <Property Name="op_date" Type="DateTime" Precision="0" />
+          <Property Name="ip" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="lg_carLocation">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="car_no" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="loc" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="priority" Type="Int32" />
+          <Property Name="dtime" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="vw_lg_cardBord">
+          <Key>
+            <PropertyRef Name="id" />
+            <PropertyRef Name="destination_priority" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="card_no" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="car_priority" Type="Int32" />
+          <Property Name="department" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="department_pos" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="status" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="loader_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="loader_number" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="loader_date" Type="DateTime" Precision="3" />
+          <Property Name="loader_canceller" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="caceller_date" Type="DateTime" Precision="3" />
+          <Property Name="transfer_name" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="transfer_num" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="transfer_date" Type="DateTime" Precision="3" />
+          <Property Name="receiver_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="receiver_num" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="receiver_date" Type="DateTime" Precision="3" />
+          <Property Name="destination" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="destination_priority" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="department_priority" Type="Int32" />
+          <Property Name="department_contacts" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="department_contact_email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="destination_contacts" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="destination_contact_email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="return_apply_date" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="return_apply_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="return_status" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="return_reason" Type="String" MaxLength="5000" FixedLength="false" Unicode="false" />
+          <Property Name="pack_num" Type="Int32" />
+          <Property Name="is_emergency" Type="Int32" />
+          <Property Name="mobile_phone" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="vw_lg_localInfo">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="position" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="number" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="contacts" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="contact_email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="priority" Type="Int32" />
+          <Property Name="mobile_phone" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="vw_lg_truckPermition">
+          <Key>
+            <PropertyRef Name="account" />
+            <PropertyRef Name="id" />
+            <PropertyRef Name="FInterID" />
+            <PropertyRef Name="FBillNo" />
+          </Key>
+          <Property Name="account" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="FInterID" Type="Int32" Nullable="false" />
+          <Property Name="FBillNo" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FSubmiter" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FSubDate" Type="DateTime" Precision="3" />
+          <Property Name="FSBillNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FSInterID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FStatus" Type="Int32" />
+          <Property Name="FEmpName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FShipToName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FChecker" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="FCheckDate" Type="DateTime" Precision="3" />
+          <Property Name="FItemName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FModel" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="FQty" Type="Decimal" Precision="18" Scale="4" />
+        </EntityType>
+        <ComplexType Name="GetLGFinishPermition_Result">
+          <Property Type="String" Name="account" Nullable="false" MaxLength="4" />
+          <Property Type="Int32" Name="FInterID" Nullable="false" />
+          <Property Type="String" Name="FBillNo" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="FSubmiter" Nullable="true" MaxLength="50" />
+          <Property Type="DateTime" Name="FSubDate" Nullable="true" Precision="23" />
+          <Property Type="Int32" Name="FStatus" Nullable="true" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="LogisticsModelStoreContainer" CdmEntityContainer="LogisticsEntities">
+          <EntitySetMapping Name="ei_users">
+            <EntityTypeMapping TypeName="LogisticsModel.ei_users">
+              <MappingFragment StoreEntitySet="ei_users">
+                <ScalarProperty Name="short_portrait" ColumnName="short_portrait" />
+                <ScalarProperty Name="short_phone" ColumnName="short_phone" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="card_number" ColumnName="card_number" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="phone" ColumnName="phone" />
+                <ScalarProperty Name="forbit_flag" ColumnName="forbit_flag" />
+                <ScalarProperty Name="create_date" ColumnName="create_date" />
+                <ScalarProperty Name="last_login_date" ColumnName="last_login_date" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="fail_times" ColumnName="fail_times" />
+                <ScalarProperty Name="sex" ColumnName="sex" />
+                <ScalarProperty Name="id_number" ColumnName="id_number" />
+                <ScalarProperty Name="salary_no" ColumnName="salary_no" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="GetHREmpStatus" FunctionName="LogisticsModel.Store.GetHREmpStatus" />
+          <FunctionImportMapping FunctionImportName="UpdateLgPDAUser" FunctionName="LogisticsModel.Store.UpdateLgPDAUser" />
+          <EntitySetMapping Name="vw_lg_users">
+            <EntityTypeMapping TypeName="LogisticsModel.vw_lg_users">
+              <MappingFragment StoreEntitySet="vw_lg_users">
+                <ScalarProperty Name="route" ColumnName="route" />
+                <ScalarProperty Name="limit_qty" ColumnName="limit_qty" />
+                <ScalarProperty Name="default_loc_priority" ColumnName="default_loc_priority" />
+                <ScalarProperty Name="default_loc" ColumnName="default_loc" />
+                <ScalarProperty Name="last_login_date" ColumnName="last_login_date" />
+                <ScalarProperty Name="fail_times" ColumnName="fail_times" />
+                <ScalarProperty Name="forbit_flag" ColumnName="forbit_flag" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="duty" ColumnName="duty" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="short_phone_no" ColumnName="short_phone_no" />
+                <ScalarProperty Name="phone_no" ColumnName="phone_no" />
+                <ScalarProperty Name="car_no" ColumnName="car_no" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="card_number" ColumnName="card_number" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="platform" ColumnName="platform" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="lg_event_log">
+            <EntityTypeMapping TypeName="LogisticsModel.lg_event_log">
+              <MappingFragment StoreEntitySet="lg_event_log">
+                <ScalarProperty Name="ip" ColumnName="ip" />
+                <ScalarProperty Name="op_date" ColumnName="op_date" />
+                <ScalarProperty Name="is_normal" ColumnName="is_normal" />
+                <ScalarProperty Name="do_what" ColumnName="do_what" />
+                <ScalarProperty Name="model" ColumnName="model" />
+                <ScalarProperty Name="user_name" ColumnName="user_name" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="UpdatePDAPassword" FunctionName="LogisticsModel.Store.UpdatePDAPassword" />
+          <FunctionImportMapping FunctionImportName="UpdateLgCardInfo" FunctionName="LogisticsModel.Store.UpdateLgCardInfo" />
+          <FunctionImportMapping FunctionImportName="UpdateLgDefaultLoc" FunctionName="LogisticsModel.Store.UpdateLgDefaultLoc" />
+          <EntitySetMapping Name="lg_carLocation">
+            <EntityTypeMapping TypeName="LogisticsModel.lg_carLocation">
+              <MappingFragment StoreEntitySet="lg_carLocation">
+                <ScalarProperty Name="dtime" ColumnName="dtime" />
+                <ScalarProperty Name="priority" ColumnName="priority" />
+                <ScalarProperty Name="loc" ColumnName="loc" />
+                <ScalarProperty Name="car_no" ColumnName="car_no" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="AuditLgReturnCard" FunctionName="LogisticsModel.Store.AuditLgReturnCard" />
+          <EntitySetMapping Name="vw_lg_cardBord">
+            <EntityTypeMapping TypeName="LogisticsModel.vw_lg_cardBord">
+              <MappingFragment StoreEntitySet="vw_lg_cardBord">
+                <ScalarProperty Name="mobile_phone" ColumnName="mobile_phone" />
+                <ScalarProperty Name="is_emergency" ColumnName="is_emergency" />
+                <ScalarProperty Name="pack_num" ColumnName="pack_num" />
+                <ScalarProperty Name="return_reason" ColumnName="return_reason" />
+                <ScalarProperty Name="return_status" ColumnName="return_status" />
+                <ScalarProperty Name="return_apply_name" ColumnName="return_apply_name" />
+                <ScalarProperty Name="return_apply_date" ColumnName="return_apply_date" />
+                <ScalarProperty Name="destination_contact_email" ColumnName="destination_contact_email" />
+                <ScalarProperty Name="destination_contacts" ColumnName="destination_contacts" />
+                <ScalarProperty Name="department_contact_email" ColumnName="department_contact_email" />
+                <ScalarProperty Name="department_contacts" ColumnName="department_contacts" />
+                <ScalarProperty Name="department_priority" ColumnName="department_priority" />
+                <ScalarProperty Name="destination_priority" ColumnName="destination_priority" />
+                <ScalarProperty Name="destination" ColumnName="destination" />
+                <ScalarProperty Name="receiver_date" ColumnName="receiver_date" />
+                <ScalarProperty Name="receiver_num" ColumnName="receiver_num" />
+                <ScalarProperty Name="receiver_name" ColumnName="receiver_name" />
+                <ScalarProperty Name="transfer_date" ColumnName="transfer_date" />
+                <ScalarProperty Name="transfer_num" ColumnName="transfer_num" />
+                <ScalarProperty Name="transfer_name" ColumnName="transfer_name" />
+                <ScalarProperty Name="caceller_date" ColumnName="caceller_date" />
+                <ScalarProperty Name="loader_canceller" ColumnName="loader_canceller" />
+                <ScalarProperty Name="loader_date" ColumnName="loader_date" />
+                <ScalarProperty Name="loader_number" ColumnName="loader_number" />
+                <ScalarProperty Name="loader_name" ColumnName="loader_name" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="department_pos" ColumnName="department_pos" />
+                <ScalarProperty Name="department" ColumnName="department" />
+                <ScalarProperty Name="car_priority" ColumnName="car_priority" />
+                <ScalarProperty Name="card_no" ColumnName="card_no" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vw_lg_localInfo">
+            <EntityTypeMapping TypeName="LogisticsModel.vw_lg_localInfo">
+              <MappingFragment StoreEntitySet="vw_lg_localInfo">
+                <ScalarProperty Name="mobile_phone" ColumnName="mobile_phone" />
+                <ScalarProperty Name="priority" ColumnName="priority" />
+                <ScalarProperty Name="contact_email" ColumnName="contact_email" />
+                <ScalarProperty Name="contacts" ColumnName="contacts" />
+                <ScalarProperty Name="number" ColumnName="number" />
+                <ScalarProperty Name="position" ColumnName="position" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vw_lg_truckPermition">
+            <EntityTypeMapping TypeName="LogisticsModel.vw_lg_truckPermition">
+              <MappingFragment StoreEntitySet="vw_lg_truckPermition">
+                <ScalarProperty Name="FQty" ColumnName="FQty" />
+                <ScalarProperty Name="FModel" ColumnName="FModel" />
+                <ScalarProperty Name="FItemName" ColumnName="FItemName" />
+                <ScalarProperty Name="FCheckDate" ColumnName="FCheckDate" />
+                <ScalarProperty Name="FChecker" ColumnName="FChecker" />
+                <ScalarProperty Name="FShipToName" ColumnName="FShipToName" />
+                <ScalarProperty Name="FEmpName" ColumnName="FEmpName" />
+                <ScalarProperty Name="FStatus" ColumnName="FStatus" />
+                <ScalarProperty Name="FSInterID" ColumnName="FSInterID" />
+                <ScalarProperty Name="FSBillNo" ColumnName="FSBillNo" />
+                <ScalarProperty Name="FSubDate" ColumnName="FSubDate" />
+                <ScalarProperty Name="FSubmiter" ColumnName="FSubmiter" />
+                <ScalarProperty Name="FBillNo" ColumnName="FBillNo" />
+                <ScalarProperty Name="FInterID" ColumnName="FInterID" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="account" ColumnName="account" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="GetLGFinishPermition" FunctionName="LogisticsModel.Store.GetLGFinishPermition">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="LogisticsModel.GetLGFinishPermition_Result">
+                <ScalarProperty Name="account" ColumnName="account" />
+                <ScalarProperty Name="FInterID" ColumnName="FInterID" />
+                <ScalarProperty Name="FBillNo" ColumnName="FBillNo" />
+                <ScalarProperty Name="FSubmiter" ColumnName="FSubmiter" />
+                <ScalarProperty Name="FSubDate" ColumnName="FSubDate" />
+                <ScalarProperty Name="FStatus" ColumnName="FStatus" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="AuditLGTruckPermition" FunctionName="LogisticsModel.Store.AuditLGTruckPermition" />
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="true" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="无" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

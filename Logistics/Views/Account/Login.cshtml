@@ -1,0 +1,97 @@
+﻿@section CSS {
+    <link rel="stylesheet" href="@Url.Content("~/Content/login.css")" />
+}
+@section Scripts {
+
+    <script>
+        document.onkeydown = function (event) {
+            var e = event || window.event || arguments.callee.caller.arguments[0];
+            if (e && e.keyCode == 13) { // enter 键
+                if ($("#password").val() == "") {
+                    $("#password").focus();
+                } else if ($("#validateCode").val() == "") {
+                    $("#validateCode").focus();
+                } else {
+                    $("#btn_submit").click();
+                }
+            }
+        };
+        var currentStep = 0;
+        var cardNumber = "";
+        $(function () {
+            $("#rememberMe").iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+            });
+            $("#validateImage").click(function () {
+                $(this).attr("src", "@Url.Content("~/Account/getImage")" + "?" + Math.random());
+            });
+            $("#validateImage").click();
+            $("#btn_submit").click(function () {
+                var rememberDay = 1;
+                if ($("#rememberMe:checked").length == 1) {
+                    rememberDay = 30;
+                }                
+                $(this).button('loading');
+                $.post("@Url.Content("~/Account/Login")", {
+                    username: $("#userName").val(),
+                    password: $("#password").val(),
+                    code: $("#validateCode").val(),
+                    rememberDay: rememberDay
+                }, function (res) {
+                    $("#btn_submit").button('reset');
+                    if (!res.suc) {
+                        showMsg(res.msg);                        
+                    } else {
+                        window.location.href = "@Url.Content("~/")" ;
+                    }
+                });
+            });            
+            
+        });
+        //登陆错误显示信息
+        function showMsg(msg) {
+            $("#password").val("");
+            $("#validateCode").val("");
+            $("#validateImage").click();
+            $("#password").focus();
+            toastr.error(msg);
+        }        
+    </script>
+}
+<div class="container">
+    <div class="panel panel-success" id="div_signin" style="max-width:420px;margin:60px auto 0 auto;">
+        <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-car"></i> 信利厂内物流平台</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-signin" id="form_signin">
+                <label for="userName" class="sr-only">用户名</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-user" style="width:14px;"></i></div>
+                    <input type="text" id="userName" name="userName" class="form-control" placeholder="请输入厂牌" autocomplete="off" required autofocus />
+                </div>
+                <label for="password" class="sr-only">密码</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-lock" style="width:14px;"></i></div>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="请输入密码" required />
+                </div>
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-eye" style="width:14px;"></i></div>
+                    <label for="validateCode" class="sr-only">验证码</label>
+                    <input type="text" id="validateCode" name="validateCode" class="form-control" placeholder="请输入验证码" autocomplete="off" required />
+                    <div class="input-group-addon" style="background-color:white;"><img title="点击刷新图片" alt="click to reflesh picture" id="validateImage" style="cursor:pointer;" src="@Url.Content("~/Account/getImage")" /></div>
+                </div>
+                <div style="margin:5px 0 0 40px;">
+                    <input type="checkbox" name="rememberMe" id="rememberMe" /><span class="text-info small"> 30日免登陆，请勿在共用设备勾选此项</span>
+                </div>
+                <button class="btn btn-success btn-lg btn-block" style="margin-top:5px;" id="btn_submit" data-loading-text="登陆中...">
+                    <i class="fa fa-sign-in"></i> 登 陆
+                </button>
+                <p class="text-info small">
+                    <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+                    此系统支持安卓、苹果手机或平板自带浏览器以及Chrome、IE10+桌面浏览器
+                </p>
+            </div>
+        </div>
+    </div>
+</div> <!-- /container -->

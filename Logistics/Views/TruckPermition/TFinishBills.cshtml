@@ -1,0 +1,174 @@
+﻿@using Logistics.Models;
+@{
+    List<SimpleTruckModels> list = (List<SimpleTruckModels>)ViewData["model"];
+}
+@section CSS{
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-datetimepicker.min.css")" />
+<style>
+    .okBadge {
+        color: #FFF;
+        background-color: #337ab7;
+    }
+    .ngBadge{
+        color:#FFF;
+        background-color:#d9534f;
+    }
+</style>
+
+}
+@section Scripts{
+    @*加入以下js，使IE8支持datetimepicker组件*@
+    <script>
+        if (!Array.prototype.indexOf) {
+            Array.prototype.indexOf = function (elt /*, from*/) {
+                var len = this.length >>> 0;
+
+                var from = Number(arguments[1]) || 0;
+                from = (from < 0)
+                     ? Math.ceil(from)
+                     : Math.floor(from);
+                if (from < 0)
+                    from += len;
+
+                for (; from < len; from++) {
+                    if (from in this &&
+                        this[from] === elt)
+                        return from;
+                }
+                return -1;
+            };
+        }
+    </script>
+    <script src="@Url.Content("~/Scripts/bootstrap-datetimepicker.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap-datetimepicker.zh-CN.js")"></script>
+    <script>
+        $(function () {
+            $(".form_date").datetimepicker({
+                language: 'zh-CN',
+                format: "yyyy-mm-dd",
+                autoclose: true,
+                todayBtn: true,
+                startView: 2,
+                minView: 2,
+                endDate: new Date()
+            });
+            //设置日期联动，结束日期不能大于起始日期
+            $("#fromDatePicker").on("changeDate", function (e) {
+                $('#toDatePicker1').datetimepicker('setStartDate', e.date);
+            });
+            $("#toDatePicker").on("changeDate", function (e) {
+                $('#fromDatePicker1').datetimepicker('setEndDate', e.date);
+            });
+
+            $("#searchText").keyup(function () {
+                if (event.keyCode == 13) {
+                    $("#searchBt").trigger("click");
+                }
+            });
+            $("#searchBt").click(function () {
+                var sText = $("#searchText").val();
+                var fd = $("#from_date").val();
+                var td = $("#to_date").val();
+                window.location.href = "@Url.Content("~/TruckPermition/GetFinishBills?fd=")" + fd + "&td=" + td + "&searchContent=" + sText;
+            });
+
+            $("#previousLink").click(function () {
+                var currentPage = parseInt($("#currentPage").html());
+                if (currentPage > 1) {
+                    var sText = $("#searchText").val();
+                    var fd = $("#from_date").val();
+                    var td = $("#to_date").val();
+                    window.location.href = "@Url.Content("~/TruckPermition/GetFinishBills?fd=")" + fd + "&td=" + td + "&searchContent=" + sText + "&page=" + (currentPage - 1);
+                }
+            });
+
+            $("#nextLink").click(function () {
+                var currentPage = parseInt($("#currentPage").html());
+                var totalPage = parseInt($("#totalPage").html());
+                console.log(currentPage + " " + totalPage);
+                if (currentPage < totalPage) {
+                    var sText = $("#searchText").val();
+                    var fd = $("#from_date").val();
+                    var td = $("#to_date").val();
+                    window.location.href = "@Url.Content("~/TruckPermition/GetFinishBills?fd=")" + fd + "&td=" + td + "&searchContent=" + sText + "&page=" + (currentPage + 1);
+                }
+            });
+
+        })
+    </script>
+}
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <i class="fa fa-list-ol"></i> 已审核订单
+    </div>
+    <div class="panel-body">
+        <div class="text-left">
+            <button class="btn btn-default btn-sm" onclick="javascript:window.location.href='@Url.Content("~/TruckPermition/TIndex")'">
+                <i class="fa fa-arrow-left"></i> 待审核单据
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-6">
+                <label for="recharge_from_date" class="sr-only">起始日期</label>
+                <div class="input-group date form_date" style="margin-top:10px;" id="fromDatePicker">
+                    <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
+                    <input class="form-control" type="text" id="from_date" placeholder="请输入审核起始日期" value="@ViewData["fromDate"]" readonly />
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6">
+                <label for="recharge_to_date" class="sr-only">结束日期</label>
+                <div class="input-group date form_date" style="margin-top:10px;" id="toDatePicker">
+                    <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
+                    <input class="form-control" type="text" id="to_date" placeholder="请输入审核结束日期" value="@ViewData["toDate"]" readonly />
+                </div>
+            </div>
+        </div>
+        <div class="input-group" style="margin-top:10px;">
+            <input class="form-control" type="text" id="searchText" value="@ViewData["searchContent"]" placeholder="请输入流水号进行查询" />
+            <div class="input-group-btn">
+                <button class="btn btn-danger btn-block" id="searchBt" data-loading-text="搜索中...">
+                    <i class="fa fa-search"></i> 搜索
+                </button>
+            </div>
+        </div>
+    </div>
+    @if (list != null && list.Count()>0) {
+        <div class="list-group">
+            @foreach (var l in list) {
+            <a class="list-group-item" href="@string.Concat(Url.Content("~/TruckPermition/TDetails?billNo="),l.billNo)">
+                <div class="media">
+                    <div class="media-left media-middle">
+                        <img class="media-object" src="@Url.Content("~/Content/images/truck_48.png")" />
+                    </div>
+                    <div class="media-body">
+                        <div class="media-heading">
+                            [@l.accountName] @l.billNo
+                        </div>
+                        <div>
+                            @l.submitter @l.submitDateStr
+                        </div>
+                    </div>
+                    <div class="media-right">
+                        @if (l.status == "OK") { 
+                            <span class="okBadge badge">@l.status</span>
+                        }
+                        else {
+                            <span class="ngBadge badge">@l.status</span>
+                        }
+                    </div>
+                </div>
+            </a>
+            }
+            <nav>
+                <ul class="pager">
+                    <li><a href="#searchBt" id="previousLink"><i class="fa fa-mail-reply"></i> </a></li>
+                    <li>第<span id="currentPage">@ViewData["currentPage"]</span>页，共<span id="totalPage">@ViewData["pageCount"]</span>页</li>
+                    <li><a href="#searchBt" id="nextLink"><i class="fa fa-mail-forward"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    }
+    else if (list != null && list.Count() == 0) {
+        <div class="text-warning text-center" style="margin:6px;">---------暂没有已审核的放行申请---------</div>
+    }

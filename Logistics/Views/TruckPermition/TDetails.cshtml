@@ -1,0 +1,107 @@
+﻿@using Logistics.Models;
+@{
+    List<TruckModels> list = (List<TruckModels>)ViewData["model"];
+    var st = list.First().simpleTruckModel;
+}
+@section Scripts{
+    <script>
+        $(function () {
+            $("#okBt").click(function () {
+                $(this).button("loading");
+                openConfirmDialog("确定要同意这张放行单吗？", function () { beginAudit(true); });
+                
+            });
+            $("#ngBt").click(function () {
+                $(this).button("loading");
+                openConfirmDialog("确定要退回这张放行单吗？", function () { beginAudit(false); });
+            });
+        })
+        function beginAudit(isOk) {
+            var opinion = $("#auditOpinion").val();
+            $.post("@Url.Content("~/TruckPermition/AuditPermition")", { billNo: "@st.billNo", isOK: isOk, opinion: opinion }, function (data) {
+                if (data.suc) {
+                    $("#st").html(isOk ? "审核通过" : "已NG");
+                    $("#opDiv").hide();
+                    toastr.success(data.msg+",请等待跳转...");
+                    setTimeout(function () {
+                        window.location.href = "@Url.Content("~/TruckPermition/TIndex")";
+                    }, 2000);
+                } else {
+                    toastr.error(data.msg);
+                }
+            });
+        }
+    </script>
+}
+<div class="panel panel-success">
+    <div class="panel-heading">
+        <i class="fa fa-truck"></i> 基本信息
+    </div>
+    <div class="panel-body">
+        <div class="row text-success">
+            <div class="col-xs-12">
+                <i class="fa fa-sort-numeric-asc fa-fw"></i> 流水号: <b> @st.billNo</b>
+            </div>
+            <div class="col-xs-6">
+                <i class="fa fa-home fa-fw"></i> 公司: <b>@st.accountName</b>
+            </div>
+            <div class="col-xs-6">
+                <i class="fa fa-bookmark fa-fw"></i> 状态: <b id="st">@st.status</b>
+            </div>
+            <div class="col-xs-6">
+                <i class="fa fa-user fa-fw"></i> 提交人: <b>@st.submitter</b>
+            </div>
+            <div class="col-xs-6">
+                <i class="fa fa-calendar fa-fw"></i> 提交日期: <b>@st.submitDateStr</b>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-danger">
+    <div class="panel panel-heading" style="margin-bottom:2px;">
+        <i class="fa fa-list-alt"></i> 详细信息
+    </div>
+    <div class="panel-body">
+        @if (st.status.Equals("待审核")) {
+            <input class="form-control" type="text" id="auditOpinion" placeholder="在此可输入审核意见" style="margin-bottom:5px;"/>
+            <div class="btn-group btn-group-justified" role="group" aria-label="操作按钮" id="opDiv">
+                <div class="btn-group" role="group">
+                    <div>
+                        <button class="btn btn-primary btn-block" id="okBt" data-loading-text="处理中..."><i class="fa fa-check"></i>&nbsp; OK</button>
+                    </div>
+                </div>
+                <div class="btn-group" role="group">
+                    <div>
+                        <button class="btn btn-danger btn-block" id="ngBt" data-loading-text="处理中..."><i class="fa fa-close"></i>&nbsp; NG</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    @foreach (var l in list) {
+        <a class="list-group-item">
+            <div class="media">
+                <div class="media-left media-middle">
+                    <img class="media-object" src="@Url.Content("~/Content/images/gear.png")" />
+                </div>
+                <div class="media-body">
+                    <div class="media-heading">
+                        <b> @l.model </b>
+                    </div>
+                    @*<div>
+                        @l.itemName 
+                    </div>*@
+                    <div>
+                        数量: @l.qty
+                    </div>
+                    @*<div>
+                        @l.customer
+                    </div>*@
+                </div>
+            </div>
+        </a>
+    }
+</div>
+@section Modal {
+@Html.Partial("_ConfirmDialog")
+}

@@ -1,0 +1,777 @@
+﻿@{
+    List<string> locList = (List<string>)ViewData["locList"];
+}
+@section CSS{
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-datetimepicker.min.css")" />
+    <style>
+        .badge {
+            color: #337ab7;
+            background-color: #fff;
+        }
+    </style>
+}
+@section Scripts{
+    @*加入以下js，使IE8支持datetimepicker组件*@
+    <script>
+        if (!Array.prototype.indexOf) {
+            Array.prototype.indexOf = function (elt /*, from*/) {
+                var len = this.length >>> 0;
+
+                var from = Number(arguments[1]) || 0;
+                from = (from < 0)
+                     ? Math.ceil(from)
+                     : Math.floor(from);
+                if (from < 0)
+                    from += len;
+
+                for (; from < len; from++) {
+                    if (from in this &&
+                        this[from] === elt)
+                        return from;
+                }
+                return -1;
+            };
+        }
+    </script>
+    <script src="@Url.Content("~/Scripts/bootstrap-datetimepicker.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap-datetimepicker.zh-CN.js")"></script>
+    <script>
+        //倒计时，设置几秒钟刷新一次
+        var ticks = 20;
+        var s;
+        function refleshWaitingRecord() {
+            clearInterval(s);
+            s = setInterval(function () {
+                var timer = parseInt($("#timer").html());
+                if (timer > 0) {
+                    timer--;
+                    $("#timer").html(timer);
+                } else {
+                    $("#timerIcon").addClass("fa-spin");
+                    clearInterval(s);
+                    setTimeout(refleshWaitingDealRecord, 1000);
+                }
+            }, 1000);
+        }
+        refleshWaitingRecord();
+
+        $(function () {
+            $("#timer").html(1);
+
+            $(".form_date").datetimepicker({
+                language: 'zh-CN',
+                format: "yyyy-mm-dd",
+                autoclose: true,
+                todayBtn: true,
+                startView: 2,
+                minView: 2,
+                endDate: new Date()
+            });
+            //设置时间点，只能查最近3个月
+            $('#fromDatePicker').datetimepicker('setStartDate', new Date("@(DateTime.Now.AddMonths(-3).ToString("yyyy-MM-dd"))"));
+            $('#toDatePicker').datetimepicker('setStartDate', new Date("@(DateTime.Now.AddMonths(-3).ToString("yyyy-MM-dd"))"));
+
+            //设置日期联动，结束日期不能大于起始日期
+            $("#fromDatePicker").on("changeDate", function (e) {
+                $('#toDatePicker1').datetimepicker('setStartDate', e.date);
+            });
+            $("#toDatePicker").on("changeDate", function (e) {
+                $('#fromDatePicker1').datetimepicker('setEndDate', e.date);
+            });
+
+            //点击其它tab时，计时器停止执行
+            $('a[data-toggle="tab"]').on('click', function (e) {
+                var currentTab = $(this).html();
+                if (currentTab.indexOf("待处理") < 0) {
+                    clearInterval(s);
+                    $("#timer").html(ticks);
+                } else {
+                    refleshWaitingRecord();
+                }
+                //点击处理中tab，更新一下
+                if (currentTab.indexOf("处理中") >= 0) {
+                    refleshDealingRecord();
+                }
+            });
+
+            //更新密码
+            $("#resetPassLink").click(function () {
+                $("#old_password").val("");
+                $("#new_password").val("");
+                $("#confirm_password").val("");
+                $("#resetPassModal").modal("show");
+            });
+            $("#resetPassBt").click(function () {
+                var old = $("#old_password").val();
+                var new1 = $("#new_password").val();
+                var new2 = $("#confirm_password").val();
+                if (old == "") {
+                    toastr.error("旧密码不能为空");
+                    return;
+                }
+                if (new1.length < 6) {
+                    toastr.error("新密码长度必须不少于6个字符");
+                    return;
+                }
+                if (new1 != new2) {
+                    toastr.error("新密码与确认密码不一致");
+                    return;
+                }
+                $.post("@Url.Content("~/Account/ChangePassword")", { old_pass: old, new_pass: new1 }, function (data) {
+                    if (data.suc) {
+                        $("#resetPassModal").modal("hide");
+                        toastr.success(data.msg);
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                });
+            });
+
+            //更新起始位置
+            $("#updateLocLink").click(function () {
+                $("#updateLocModal").modal("show");
+            });
+
+            $("#updateLocBt").click(function () {
+                var new_loc = $("#new_loc").val();
+                $.post("@Url.Content("~/CardBoard/UpdateDefaultLoc")", { newLoc: new_loc }, function (data) {
+                    if (data.suc) {
+                        $("#default_loc").html(new_loc);
+                        $("#old_loc").val(new_loc);
+                        $("#updateLocModal").modal("hide");
+                        toastr.success(data.msg);
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                });
+            });
+
+            //更新当前位置
+            $("#updateCurrentLocLink").click(function () {
+                $("#old_current_loc").val($("#current_loc").html());
+                $("#updateCurrentLocModal").modal("show");
+            });
+
+            $("#updateCurrentLocBt").click(function () {
+                var new_loc = $("#new_current_loc").val();
+                $.post("@Url.Content("~/CardBoard/UpdateCurrentLoc")", { newLoc: new_loc }, function (data) {
+                    if (data.suc) {
+                        $("#current_loc").html(new_loc);
+                        $("#updateCurrentLocModal").modal("hide");
+                        toastr.success(data.msg);
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                });
+            });
+
+            //待处理列表的点击事件
+            $("#waitingCardContent").on("click", "a", function () {
+                var total = parseInt($("#LoadNum").html());
+                if ($(this).hasClass("active")) {
+                    total--;
+                    $(this).removeClass("active");
+                    $(this).find(".badge").addClass("hidden");
+                } else {
+                    total++;
+                    $(this).addClass("active");
+                    $(this).find(".badge").removeClass("hidden");
+                }
+                $("#LoadNum").html(total);
+            });
+
+            //处理中列表的点击事件
+            $("#dealingCardContent").on("click", "a", function () {
+                //先看是否锁定状态
+                var lockedFlag = $(this).find(".lockedFlag");
+                if (lockedFlag && lockedFlag.length > 0) {                    
+                    $("#returnCardNo").val($(this).find(".returnCardNo").val());
+                    $("#applier").val($(this).find(".applier").val());
+                    $("#applyDate").val($(this).find(".applyDate").val());
+                    $("#applyReason").val($(this).find(".returnReason").val());
+                    if ($(this).find(".cardStatus").val() == "未装货") {
+                        $("#disagreeApplyBt").addClass("disabled");
+                    } else {
+                        $("#disagreeApplyBt").removeClass("disabled");
+                    }
+                    $("#AuditReturnApplyModal").modal("show");
+                } else {
+                    if ($(this).hasClass("active")) {
+                        $(this).removeClass("active");
+                        $(this).find(".badge").addClass("hidden");
+                    } else {
+                        $(this).addClass("active");
+                        $(this).find(".badge").removeClass("hidden");
+                    }
+                }
+            });
+
+            //点击承载按钮
+            $("#LoadBt").click(function () {
+                var ids = "";
+                $("#waitingCardContent a.active").each(function () {
+                    if (ids != "") ids += ",";
+                    ids += $(this).find(".cardId").val();
+                });
+                if (ids == "") {
+                    toastr.error("请先选择需承载卡板");
+                    return;
+                }
+                $(this).button("loading");
+                $.post("@Url.Content("~/CardBoard/AcceptCards")", { ids: ids }, function (data) {
+                    if (data.suc) {
+                        toastr.success(data.msg);
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                    refleshWaitingDealRecord();
+                    $("#LoadBt").button('reset');
+                });
+            });
+
+            //点击装货按钮
+            $("#onCarBt").click(function () {
+                var ids = "";                
+                $("#dealingCardContent a.active").each(function () {
+                    if (ids != "") ids += ",";
+                    ids += $(this).find(".cardId").val();
+                });
+                if (ids == "") {
+                    toastr.error("请先选择需装货卡板");
+                    return;
+                }                
+                $(this).button("loading");
+                $.post("@Url.Content("~/CardBoard/UploadingCards")", { ids: ids }, function (data) {
+                    if (data.suc) {
+                        toastr.success(data.msg);
+                        $("#current_loc").html(data.loc);
+                        refleshDealingRecord();
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                    $("#onCarBt").button('reset');
+                });
+            });
+
+            //点击卸货按钮
+            $("#offCarBt").click(function () {
+                var ids = "";
+                $("#dealingCardContent a.active").each(function () {
+                    if (ids != "") ids += ",";
+                    ids += $(this).find(".cardId").val();
+                });
+                if (ids == "") {
+                    toastr.error("请先选择需卸货卡板");
+                    return;
+                }
+                $(this).button("loading");
+                $.post("@Url.Content("~/CardBoard/ReceivingCards")", { ids: ids }, function (data) {
+                    if (data.suc) {
+                        toastr.success(data.msg);
+                        $("#current_loc").html(data.loc);
+                        refleshDealingRecord();
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                    $("#offCarBt").button('reset');
+                });
+            });
+
+            //点击弃单按钮
+            @*$("#resetBt").click(function () {
+                var ids = "";
+                $("#dealingCardContent a.active").each(function () {
+                    if (ids != "") ids += ",";
+                    ids += $(this).find(".cardId").val();
+                });
+                if (ids == "") {
+                    toastr.error("请先选择需弃单卡板");
+                    return;
+                }
+                openConfirmDialog("确定要放弃承载吗？件数："+ids.length, function () {                    
+                    $(this).button("loading");
+                    $.post("@Url.Content("~/CardBoard/GiveUpbills")", { ids: ids }, function (data) {
+                        if (data.suc) {
+                            toastr.success(data.msg);
+                            refleshDealingRecord();
+                        } else {
+                            toastr.error(data.msg);
+                        }
+                        $("#resetBt").button('reset');
+                    });
+                });
+            });*@
+
+            //点击查询已结束按钮
+            $("#searchBt").click(function () {
+                $(this).button("loading");
+                $.post("@Url.Content("~/CardBoard/GetFinishCards")", {
+                    fr_date: $("#from_date").val(),
+                    to_date: $("#to_date").val(),
+                    dep: $("#dep_name").val(),
+                    des: $("#des_name").val()
+                }, function (data) {
+                    if (data.suc) {
+                        //先更新页码
+                        $("#currentPage").html(1);
+                        $("#totalPage").html(data.pages);
+                        refleshFinishRecords(data.rows);
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                    $("#searchBt").button('reset');
+                });
+            });
+
+            //已处理的翻页
+            //下一页按钮
+            $("#nextLink").click(function () {
+                var currentP = parseInt($("#currentPage").html());
+                var totalP = parseInt($("#totalPage").html());
+                if (currentP == totalP) return;
+                $.post("@Url.Content("~/CardBoard/GetFinishCardsPage")", { page: currentP + 1 }, function (data) {
+                    if (data.suc) {
+                        $("#currentPage").html(currentP + 1);
+                        refleshFinishRecords(data.rows);
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                });
+            });
+
+            //上一页按钮
+            $("#previousLink").click(function () {
+                var currentP = parseInt($("#currentPage").html());
+                if (currentP == 1) return;
+                $.post("@Url.Content("~/CardBoard/GetFinishCardsPage")", { page: currentP - 1 }, function (data) {
+                    if (data.suc) {
+                        $("#currentPage").html(currentP - 1);
+                        refleshFinishRecords(data.rows);
+                    } else {
+                        toastr.error(data.msg);
+                    }
+                });
+            });
+
+            //处理返运申请按钮
+            $("#disagreeApplyBt").click(function () {
+                handleReturnApply("NG");
+            });
+            $("#agreeApplyBt").click(function () {
+                handleReturnApply("OK");
+            });
+        });
+        //从后台加载数据刷新待处理列表
+        function refleshWaitingDealRecord() {
+            $.post("@Url.Content("~/CardBoard/GetWaitingDealCards")", {}, function (data) {
+                if (data.suc) {
+                    var items = data.items;
+                    $("#waitingCardContent a").remove();
+                    for (var i = 0; i < items.length; i++) {
+                        var node = "<a class='list-group-item'><div class='media'><div class='media-left media-middle'>";
+                        node += "<img class='media-object' src='@Url.Content("~/Content/images/box.png")' alt='box'></div><div class='media-body'><h4 class='media-heading'>";
+                        node += items[i].cardNo;
+                        if (items[i].isEmergency == "1") {
+                            node += "<span style='color:red'>[急]</span>";
+                        }
+                        node += "</h4><div><input type='hidden' class='cardId' value='" + items[i].id + "'/>部门名称：";
+                        node += items[i].dep + "<br />部门位置：";
+                        node += items[i].depPos + "<br />目的地：";
+                        node += items[i].des + "<br />卡板件数：";
+                        node += items[i].packNum +"<br />";
+                        node += "联系电话：" + items[i].mobilePhone;
+                        node += "</div>";
+                        node += "</div><div class='media-right'><span class='badge hidden'><i class='fa fa-check'></i></span></div></div></a>";
+                        $("#waitingCardContent").append(node);
+                    }
+                } else {
+                    toastr.error(data.msg);
+                }
+                $("#timerIcon").removeClass("fa-spin");
+                $("#timer").html(ticks);
+                $("#LoadNum").html(0);
+                refleshWaitingRecord();
+            });
+        }
+
+        //加载处理中的列表
+        function refleshDealingRecord() {
+            $.post("@Url.Content("~/CardBoard/GetDealingCards")", {}, function (data) {
+                if (data.suc) {
+                    var items = data.items;
+                    $("#dealingCardContent a").remove();
+                    for (var i = 0; i < items.length; i++) {
+                        var node = "<a class='list-group-item'><div class='media'><div class='media-left media-middle'>";
+                        node += "<img class='media-object' src='@Url.Content("~/Content/images/bar.png")' alt='bar'></div><div class='media-body'><h4 class='media-heading'>";
+                        node += items[i].cardNo;
+                        if (items[i].isEmergency == "1") {
+                            node += "<span style='color:red'>[急]</span>";
+                        }
+                        node += " " + items[i].status;
+                        if (items[i].locked == true) {
+                            node += "<span class='lockedFlag' style='color: #CC0033;'><i class='fa fa-lock'></i></span>";
+                            node += "<input type='hidden' class='applier' value='" + items[i].returnApplier + "' />";
+                            node += "<input type='hidden' class='applyDate' value='" + items[i].returnApplyDate + "' />";
+                            node += "<input type='hidden' class='returnReason' value='" + items[i].returnReason + "' />";
+                            node += "<input type='hidden' class='returnCardNo' value='" + items[i].cardNo + "' />";
+                            node += "<input type='hidden' class='cardStatus' value='" + items[i].status + "' />";
+                        }
+                        node += "</h4><div><input type='hidden' class='cardId' value='" + items[i].id + "'/>部门名称：";
+                        node += items[i].dep + "<br />部门位置：";
+                        node += items[i].depPos + "<br />目的地：";
+                        node += items[i].des + "<br />卡板件数：";
+                        node += items[i].packNum + "<br />";
+                        node += "联系电话：" + items[i].mobilePhone;
+                        node += "</div>";
+                        node += "</div><div class='media-right'><span class='badge hidden'><i class='fa fa-check'></i></span></div></div></a>";
+                        $("#dealingCardContent").append(node);
+                    }
+                } else {
+                    toastr.error(data.msg);
+                }
+            });
+        }
+
+        //加载已处理的列表
+        function refleshFinishRecords(rows) {
+            $("#finishCardContent a").remove();
+            for (var i = 0; i < rows.length; i++) {
+                var node = "<a class='list-group-item'><div class='media'><div class='media-left media-middle'>";
+                node += "<img class='media-object' src='@Url.Content("~/Content/images/fbox.png")' alt='box'></div><div class='media-body'><h4 class='media-heading'>";
+                node += rows[i].cardNo;
+                if (rows[i].isEmergency == "1") {
+                    node += "<span style='color:red'>[急]</span>";
+                }
+                node += "</h4>部门名称：";
+                node += rows[i].dep + "<br />部门位置：";
+                node += rows[i].depPos + "<br />目的地：";
+                node += rows[i].des + "<br />卡板件数：";
+                node += rows[i].packNum + "<br />";
+                node += "联系电话：" + rows[i].mobilePhone + "<br />";
+                node += "完成日期："+rows[i].dateStr + "</div>";
+                node += "</div></div></a>";
+                $("#finishCardContent").append(node);
+            }
+        }
+
+        //处理返运逻辑
+        function handleReturnApply(result) {
+            var cardNo = $("#returnCardNo").val();
+            $.post("@Url.Content("~/CardBoard/HandelReturnApply")", {
+                cardNo: cardNo,
+                result: result
+            }, function (data) {
+                if (data.suc) {
+                    $("#AuditReturnApplyModal").modal("hide");
+                    refleshDealingRecord();
+                    toastr.success(data.msg);
+                } else {
+                    toastr.error(data.msg);
+                }
+            });
+        }
+
+    </script>
+}
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#"><span class="text-success"><strong><i class="fa fa-car"></i> 信利厂内物流平台</strong></span></a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav"></ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#" id="resetPassLink"><i class="fa fa-key"></i> 修改密码</a></li>
+                <li><a href="#" id="updateLocLink"><i class="fa fa-location-arrow"></i> 修改起始位置</a></li>
+                <li><a href="#" id="updateCurrentLocLink"><i class="fa fa-yelp"></i> 修改当前位置</a></li>
+                <li><a href="@Url.Content("~/Account/LogOut")"><i class="fa fa-sign-out"></i> 安全退出</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+<div style="margin-top:50px;">
+    <div class="panel panel-success" style="margin-bottom:8px;">
+        <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-star-o"></i> 当前用户信息</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row text-primary">
+                <div class="col-xs-6 col-md-3"><i class="fa fa-user"></i> 当前用户：<strong>@ViewData["userName"]</strong></div>
+                <div class="col-xs-6 col-md-3"><i class="fa fa-cab"></i> 车牌号码：<strong>@ViewData["carNo"]</strong> </div>
+                <div class="col-xs-6 col-md-3"><i class="fa fa-location-arrow"></i> 起始位置：<strong id="default_loc">@ViewData["defaultLoc"]</strong></div>
+                <div class="col-xs-6 col-md-3"><i class="fa fa-yelp"></i> 当前位置：<strong id="current_loc">@ViewData["currentLoc"]</strong></div>
+                <div class="col-xs-6 col-md-3"><i class="fa fa-exchange"></i> 最多可承载数量：<strong>@ViewData["maxNum"]</strong></div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-list"></i> 卡板信息</h3>
+        </div>
+        <div class="panel-body">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#waitingCard" aria-controls="waitingCard" role="tab" data-toggle="tab">待处理 <span id="timer"></span>s <i class="fa fa-refresh" id="timerIcon"></i> </a></li>
+                <li role="presentation"><a href="#dealingCard" aria-controls="dealingCard" role="tab" data-toggle="tab">处理中</a></li>
+                <li role="presentation"><a href="#finishCard" aria-controls="finishCard" role="tab" data-toggle="tab">已处理</a></li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <!-- 待处理记录tab -->
+                <div role="tabpanel" class="tab-pane fade in active" id="waitingCard">
+                    <div class="panel panel-default" style="margin-top:10px;">
+                        <div class="panel-body">
+                            <div style="margin-top:10px;">
+                                <button class="btn btn-success btn-block" id="LoadBt" data-loading-text="处理中...">
+                                    <i class="fa fa-check-circle"></i> 确认承载(已选择：<span id="LoadNum">0</span>)
+                                </button>
+                            </div>
+                        </div>
+                        <div class="list-group" id="waitingCardContent">
+                            @*此处插入待处理记录*@
+                            @*<a class="list-group-item">
+                                    <div class="media">
+                                        <div class="media-left media-middle">
+                                            <img class="media-object" src="@Url.Content("~/Content/images/box.png")" alt="box">
+                                        </div>
+                                        <div class="media-body">
+                                            <h4 class="media-heading">A160418001</h4>
+                                            <div>
+                                                <input type="hidden" class="cardId" value="1"/>
+                                                部门名称：MDS事业部生产二部 <br />
+                                                部门位置：21栋A门<br />
+                                                目的地：物流中心<br />
+                                            </div>
+                                        </div>
+                                        <div class="media-right">
+                                            <span class="badge hidden"><i class="fa fa-check"></i> </span>
+                                        </div>
+                                    </div>
+                                </a>*@
+                        </div>
+                    </div>
+                </div>
+                <!-- 处理中记录tab -->
+                <div role="tabpanel" class="tab-pane fade in" id="dealingCard">
+                    <div class="panel panel-default" style="margin-top:10px;">
+                        <div class="panel-body">
+                            <div class="btn-group btn-group-justified" role="group" aria-label="操作按钮">
+                                <div class="btn-group" role="group">
+                                    <div style="margin-top:10px;">
+                                        <button class="btn btn-primary btn-block" id="onCarBt" data-loading-text="处理中..."><i class="fa fa-upload"></i>&nbsp; 装货</button>
+                                    </div>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <div style="margin-top:10px;">
+                                        <button class="btn btn-danger btn-block" id="offCarBt" data-loading-text="处理中..."><i class="fa fa-download"></i>&nbsp; 卸货</button>
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="pull-right" style="margin-top:8px;">
+                                <button class="btn btn-default btn-sm" id="resetBt" data-loading-text="处理中..."><i class="fa fa-trash"></i> 弃单 </button> 
+                            </div>*@
+                        </div>
+                        <div class="list-group" id="dealingCardContent">
+                            @*此处插入处理中记录*@
+
+                        </div>
+                    </div>
+                </div>
+                <!-- 以下是已处理记录tab -->
+                <div role="tabpanel" class="tab-pane fade" id="finishCard">
+                    <div class="panel panel-default" style="margin-top:10px;">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6">
+                                    <label for="recharge_from_date" class="sr-only">起始日期</label>
+                                    <div class="input-group date form_date" style="margin-top:10px;" id="fromDatePicker">
+                                        <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
+                                        <input class="form-control" type="text" id="from_date" placeholder="请输入起始日期" value="@ViewData["fromDate"]" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6">
+                                    <label for="recharge_to_date" class="sr-only">结束日期</label>
+                                    <div class="input-group date form_date" style="margin-top:10px;" id="toDatePicker">
+                                        <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
+                                        <input class="form-control" type="text" id="to_date" placeholder="请输入结束日期" value="@ViewData["toDate"]" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6">
+                                    <label for="dep_name" class="sr-only">部门</label>
+                                    <div class="input-group" style="margin-top:10px;">
+                                        <span class="input-group-addon"><span class="fa fa-home"></span></span>
+                                        <input class="form-control" type="text" id="dep_name" placeholder="请输入部门" />
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6">
+                                    <label for="dep_name" class="sr-only">目的地</label>
+                                    <div class="input-group" style="margin-top:10px;">
+                                        <span class="input-group-addon"><span class="fa fa-arrows-alt"></span></span>
+                                        <input class="form-control" type="text" id="des_name" placeholder="请输入目的地" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top:10px;">
+                                <button class="btn btn-info btn-block" id="searchBt"><i class="fa fa-search" data-loading-text="查询中..."></i>  开始查询</button>
+                            </div>
+                            <div class="small text-danger"><i class="fa fa-info-circle"></i> 可以查询到最近3个月以内的承载记录</div>
+                        </div>
+                        <div class="list-group" id="finishCardContent">
+                            @*此处插入已处理记录*@
+                        </div>
+                        <nav>
+                            <ul class="pager">
+                                <li><a href="#searchBt" id="previousLink"><i class="fa fa-mail-reply"></i> </a></li>
+                                <li>第<span id="currentPage">1</span>页，共<span id="totalPage">1</span>页</li>
+                                <li><a href="#searchBt" id="nextLink"><i class="fa fa-mail-forward"></i></a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Modal {
+    <div class="modal fade" id="resetPassModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="resetPasswordLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">修改个人密码</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="personalInfoFm">
+                        <div class="form-group">
+                            <label for="old_password" class="control-label">旧密码:</label>
+                            <input type="password" class="form-control" id="old_password" />
+                        </div>
+                        <div class="form-group">
+                            <label for="new_password" class="control-label">新密码:</label>
+                            <input type="password" class="form-control" id="new_password" />
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm_password" class="control-label">确认新密码:</label>
+                            <input type="password" class="form-control" id="confirm_password" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i> 取消</button>
+                    <button id="resetPassBt" type="button" class="btn btn-success"><i class="fa fa-check"></i> 确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="updateLocModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="updateLocLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">修改起始位置</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="personalInfoFm">
+                        <div class="form-group">
+                            <label for="old_Loc" class="control-label">起始位置:</label>
+                            <input type="text" class="form-control" id="old_Loc" value="@ViewData["defaultLoc"]" readonly />
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="control-label">修改为:</label>
+                            <select class="form-control" id="new_loc">
+                                @foreach (string s in locList)
+                                {
+                                <option>@s</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="small text-danger"><i class="fa fa-info-circle"></i>起始位置：车辆每天的始发地点</div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i> 取消</button>
+                    <button id="updateLocBt" type="button" class="btn btn-success"><i class="fa fa-check"></i> 确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="updateCurrentLocModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="updateCurrentLocLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">修改当前位置</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="personalInfoFm">
+                        <div class="form-group">
+                            <label for="old_Loc" class="control-label">当前位置:</label>
+                            <input type="text" class="form-control" id="old_current_loc" readonly />
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="control-label">修改为:</label>
+                            <select class="form-control" id="new_current_loc">
+                                @foreach (string s in locList)
+                            {
+                            <option>@s</option>
+                            }
+                            </select>
+                        </div>
+                        <div class="small text-danger"><i class="fa fa-info-circle"></i>当前位置：据此对待处理列表智能排序</div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i> 取消</button>
+                    <button id="updateCurrentLocBt" type="button" class="btn btn-success"><i class="fa fa-check"></i> 确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="modal fade" id="AuditReturnApplyModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AuditReturnApplyLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">处理出货组返运申请</h4>
+            </div>
+            <div class="modal-body">
+                <form id="personalInfoFm">
+                    <div class="form-group">
+                        <label for="returnCardNo" class="control-label">卡板号:</label>
+                        <input type="text" class="form-control" id="returnCardNo" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="applier" class="control-label">申请人:</label>
+                        <input type="text" class="form-control" id="applier" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="applyDate" class="control-label">申请时间:</label>
+                        <input type="text" class="form-control" id="applyDate" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="applyReason" class="control-label">返运原因:</label>
+                        <input type="text" class="form-control" id="applyReason" readonly />
+                    </div>
+                    <div class="small text-danger"><i class="fa fa-info-circle"></i>如果同意返运，此卡板将会在你的待处理列表中消失，请将卡板运回原处；如果是未装货状态，那么只能同意返运申请。</div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="disagreeApplyBt" type="button" class="btn btn-default"><i class="fa fa-close"></i> 不同意返运</button>
+                <button id="agreeApplyBt" type="button" class="btn btn-success"><i class="fa fa-check"></i> 同意返运</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    @Html.Partial("_ConfirmDialog")
+}

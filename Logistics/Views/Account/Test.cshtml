@@ -1,0 +1,43 @@
+﻿@section CSS{
+    <style type="text/css">
+        #interactive.viewport {
+            width: 320px;
+            margin:0 auto;
+        }
+
+            /* line 6, ../sass/_viewport.scss */
+            #interactive.viewport canvas, video {
+                /*float: left;*/
+                width: 320px;
+            }
+                /* line 10, ../sass/_viewport.scss */
+                #interactive.viewport canvas.drawingBuffer, video.drawingBuffer {
+                    margin-left: -320px;
+                }
+    </style>
+}
+@section Scripts{
+    <script src="@Url.Content("~/Scripts/quagga.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/live_locator.js")"></script>    
+}
+<script>
+    if (window.location.protocol != "https:") {
+        window.location.protocol = "https:";
+    }
+    $(function () {
+        $("button.start").on("click", function () {
+            App.init();
+        });
+    });
+    function uploadAjax(code) {
+        $(".result").append("<p>" + code + "</p>");
+    }
+</script>
+<div id="interactive" class="viewport"></div>
+<div class="clearfix"></div>
+<div class="controls" style="text-align:center;">
+    <button class="btn btn-default bar-close">stop</button>
+    <button class="btn btn-default start">start</button>
+</div>
+<h2>扫描结果：</h2>
+<div class="result"></div>

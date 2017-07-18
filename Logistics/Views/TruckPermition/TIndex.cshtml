@@ -1,0 +1,69 @@
+﻿@using Logistics.Models;
+@{
+    List<SimpleTruckModels> list = (List<SimpleTruckModels>)ViewData["model"];    
+}
+
+@section Scripts{
+    <script>
+        $(function () {
+            $("#searchText").keyup(function () {
+                if (event.keyCode == 13) {
+                    $("#searchBt").trigger("click");
+                }
+            });
+            $("#searchBt").click(function () {
+                var sText = $("#searchText").val();
+                window.location.href = "@Url.Content("~/TruckPermition/TIndex?searchContent=")"+sText;
+            });
+        })
+    </script>
+    }
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <i class="fa fa-list"></i> 待审核订单
+    </div>
+    <div class="panel-body">
+        <div>
+            <button class="btn btn-default btn-sm pull-left" onclick="javascript:window.location.href='@Url.Content("~/Account/LogOut")'">
+                <i class="fa fa-sign-out fa-rotate-180"></i> 退出登录 
+            </button>
+            <button class="btn btn-default btn-sm pull-right" onclick="javascript:window.location.href='@Url.Content("~/TruckPermition/TFinishBills")'">
+                已审核单据 <i class="fa fa-arrow-right"></i>
+            </button>
+        </div>
+        <div class="clearfix"></div>
+        <div class="input-group" style="margin-top:10px;">
+            <input class="form-control" type="text" id="searchText" value="@ViewData["searchContent"]" placeholder="请输入流水号进行查询" />
+            <div class="input-group-btn">
+                <button class="btn btn-danger btn-block" id="searchBt" data-loading-text="搜索中...">
+                    <i class="fa fa-search"></i> 搜索
+                </button>
+            </div>
+        </div>
+    </div>
+    @if (list.Count() > 0) { 
+    <div class="list-group">
+        @foreach (var l in list) {
+            <a class="list-group-item" href="@string.Concat(Url.Content("~/TruckPermition/TDetails?billNo="),l.billNo)">
+                <div class="media">
+                    <div class="media-left media-middle">
+                        <img class="media-object" src="@Url.Content("~/Content/images/truck_48.png")" />
+                    </div>
+                    <div class="media-body">
+                        <div class="media-heading">
+                            [@l.accountName] @l.billNo
+                        </div>
+                        <div>
+                            @l.submitter @l.submitDateStr
+                        </div>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+    }
+    else {
+        <div class="text-warning text-center" style="margin:6px;">---------暂没有未审核的放行申请---------</div>
+    }
+</div>
